@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: catalogue
+  namespace: roboshop
+data:
+  MONGO: "true"
+  MONGO_URL: "mongodb://mongodb:27017/catalogue"
+
+---------------------------------------------
+apiVersion: app/v1
+kind: Deployment
+metadata: 
+  name: catalogue
+  namespace: roboshop
+  lables: 
+    project: roboshop
+    component: catalogue
+    tier: backend 
+spec: 
+  replicas: 1
+  selector: 
+    matchLables:
+      project: roboshop
+      component: catalogue
+      tier: backend
+  template:
+    metadata:
+      labels: 
+        project: roboshop
+        component: catalogue
+        tier: backend
+    spec: 
+      containers: 
+      - name: catalogue
+        image: poojithkumar29/catalogue:v1
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+          name: catalogue
+        ports:
+        - name: liveness-ports
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: liveness-port
+          failureThreshold: 1
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: liveness-port
+          failureThreshold: 1
+          periodSeconds: 15
+
+
+  ----------------
+
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: catalogue
+    namespace: roboshop
+    labels:
+      project: roboshop
+      component: catalogue
+      tier: backend
+  spec:
+    selector: 
+      project: roboshop
+      component: catalogue
+      tier: backend
+    ports:
+    - protocol: Tcp
+      port: 8080
+      targetPort: 8080
+
+
+    
