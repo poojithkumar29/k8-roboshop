@@ -9,7 +9,7 @@ data:
   REDIS_URL: "redis://redis:6379"
   MONGO_URL: "mongodb://mongodb:27017/users"
 
-apiVersion: app/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata: 
   name: roboshop
