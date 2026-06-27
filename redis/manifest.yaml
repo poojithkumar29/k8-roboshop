@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: redis
+  namespace: roboshop
+  labels: 
+    project: roboshop
+    component: redis
+    tier: db
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      project: roboshop
+      component: redis
+      tier: db
+  template:
+    metadata: 
+      project: roboshop
+      component: redis
+      tier: db
+  spec:
+    containers:
+    - name: liveness-port
+      containerPort: 8080
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: liveness-port
+      
