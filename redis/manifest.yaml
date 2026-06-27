@@ -19,12 +19,12 @@ spec:
       project: roboshop
       component: redis
       tier: db
-  spec:
-    containers:
-    - name: liveness-port
-      containerPort: 8080
-    readinessProbe:
-      httpGet:
-        path: /health
-        port: liveness-port
+    spec:
+      containers:
+      - name: liveness-port
+        containerPort: 8080
+      readinessProbe:
+        httpGet:
+          path: /health
+          port: liveness-port
       
