@@ -1,73 +1,73 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  project: roboshop
-  component: user
-  tier: backend
-data: 
+  name: user
+  namespace: roboshop
+data:
   MONGO: "true"
   REDIS_URL: "redis://redis:6379"
   MONGO_URL: "mongodb://mongodb:27017/users"
-
+---
 apiVersion: apps/v1
 kind: Deployment
-metadata: 
-  name: roboshop
+metadata:
+  name: user
   namespace: roboshop
-  labels: 
+  # these are replica set labels
+  labels:
     project: roboshop
     component: user
     tier: backend
-spec: 
+spec:
   replicas: 1
   selector:
+    # these labels are used to select pods
     matchLabels:
       project: roboshop
       component: user
       tier: backend
+  # pod definition
   template:
     metadata:
-      labels: 
+      labels:
         project: roboshop
         component: user
         tier: backend
-  spec:
-    containers:
-    - name: user
-      image: poojithkumar29/user
-      imagePullPolicy: Always
-    ports: 
-    - name: liveness-port
-      containerPort: 8080
-      readinessProbe:
-        httpGet: 
-          path: /health
-          port: liveness-port
-        failureThreshold: 1
-        periodSeconds: 15
-      livenessProbe:
-        httpGet: 
-          path: /health
-          port: liveness-port
-        failureThreshold: 1
-        periodSeconds: 15
--------------------
-
+    spec:
+      containers:
+      - name: user
+        image: poojithkumar29/user:v1
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: user
+        ports:
+        - name: liveness-port
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: liveness-port
+          failureThreshold: 1
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: liveness-port
+          failureThreshold: 1
+          periodSeconds: 15
+---
 apiVersion: v1
 kind: Service
-metadata: 
+metadata:
   name: user
   namespace: roboshop
-  labels: 
+spec:
+  selector:
     project: roboshop
     component: user
     tier: backend
-spec: 
-  selector: 
-    project: roboshop
-    component: user
-    tier: backend
-  port:
-  - protocol: Tcp
-    port: 8080
-    targetPort: 8080
+  ports:
+    - protocol: TCP
+      port: 8080 # service port
+      targetPort: 8080 # container port
